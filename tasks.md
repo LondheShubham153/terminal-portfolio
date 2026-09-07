@@ -27,15 +27,20 @@ Status legend: `[x]` Done · `[~]` In Progress · `[ ]` TODO. Every Done task mu
 - `/code-review` (medium, auth-focused) found 7 issues on the auth+Projects chunk — fixed: `requireAdmin` now redirects to `/admin/login` instead of throwing an uncaught error from a `<form action>` Server Action; login route now runs a constant-time dummy bcrypt compare so response timing doesn't leak whether an email is registered; project link fields (`imageUrl`/`liveUrl`/`repoUrl`) now restricted to `http(s)://` to prevent stored `javascript:` URI XSS. Left as noted-only: IP-spoofable rate limiting (acceptable for a personal-site threat model), `parse` vs `safeParse` in project form (no error UI yet — acceptable, admin-only surface).
 - Verified end-to-end: login → session cookie → all admin pages 200, a project created directly in the DB appears on the public homepage immediately with **no redeploy**, confirming the core "editable without redeploy" requirement. Full `npm run build` clean across all 20 routes.
 
+## Done (cont. 4)
+- [x] Second `/code-review` pass on remaining CRUD (skills/experience/testimonials/blog/resume/messages) found 6 issues — fixed: every mutating action now goes through `lib/admin-actions.ts#runAdminAction` (catches zod/Prisma errors and redirects to `?error=1` instead of crashing with an uncaught exception from a `<form action>` with no error boundary — this was a real, high-severity gap hit identically across 5 action files), restored `avatarUrl`/`coverImage` to the shared `httpUrl` schema (they'd bypassed the http(s)-only XSS guard), wrapped resume "single active" swap in a `$transaction` (was two separate writes, racy under concurrent uploads), fixed `AdminNav` active-link highlighting for nested routes. Left as noted-only: unbounded old-resume-file accumulation on disk (low severity, moot once production moves to Vercel Blob).
+- [x] **User-reported bug, reproduced and fixed**: creating a project with a URL typed without `http(s)://` (e.g. `github.com/me/repo` — the natural way to type one) silently failed validation and redirected to an error page with **no visible error message**, making project creation look like it silently did nothing. Root cause: `httpUrl` schema rejected bare domains outright, and no page rendered the `?error=1` state. Fixed by (1) `lib/validation.ts#httpUrl` now auto-normalizes a bare domain to `https://` instead of rejecting it, still blocking `javascript:` URIs, and (2) adding `components/admin/ErrorBanner.tsx`, wired into every admin form page, so any future validation failure is visible instead of silent. Reproduced live with a Playwright script before fixing, then locked in as a permanent regression test (see below).
+- [x] Added `components/admin/ConfirmSubmitButton.tsx` — all admin delete actions (projects, posts, skills, experience, testimonials, messages) now confirm before submitting, since none had any confirmation before.
+- [x] **Test suite added**: Vitest (`npm run test`, 15 tests) covers `lib/validation.ts` (including the exact bug above), `lib/rate-limit.ts` (including the cross-bucket eviction regression), `lib/auth.ts` (password hashing). Playwright e2e (`npm run test:e2e`, 14 tests, disposable `prisma/e2e-test.db` migrated+seeded fresh per run) covers the public site, contact form + honeypot, admin login/logout/session-gating, and full project CRUD including a dedicated regression test for the bare-URL bug and a "silent failure" test asserting invalid submissions show a visible error. All 29 tests pass.
+- Verified: `npm run build` clean (20 routes), `npm run test` 15/15 pass, `npm run test:e2e` 14/14 pass.
+
+- [x] Third `/code-review` pass found 4 more issues — fixed: `runAdminAction` now re-throws Next's internal `NEXT_REDIRECT`/`NEXT_NOT_FOUND` errors instead of swallowing them (a latent foot-gun for any future nested redirect/notFound call); **all delete/mark-read actions** (project, post, skill, experience, testimonial, message) now redirect to `?error=1` on failure like every create/update action does — previously a failed delete redirected to the plain list URL with zero visible feedback, undermining the very error-banner mechanism just added; added the missing `ErrorBanner` to the `projects`, `blog`, and `messages` list pages (only sub-pages had it); `httpUrl` now caps length *after* the `https://` auto-prepend, not just before. Re-verified: build clean, 15/15 Vitest, 14/14 Playwright.
+
 ## In Progress
-- [~] Second `/code-review` pass on remaining CRUD sections (skills/experience/testimonials/blog/resume/messages) — running.
 
 ## TODO
 - [ ] SEO: per-page metadata, sitemap.xml, robots.txt, OG images
 - [ ] Accessibility + performance + Core Web Vitals pass
-- [ ] Vitest unit tests for lib/
-- [ ] Playwright e2e smoke tests
-- [ ] GitHub Actions CI (lint + build + test)
-- [ ] `.env.example` + secrets documentation
+- [ ] GitHub Actions CI (lint + build + test + test:e2e)
 - [ ] Production DB decision + migration to Turso/Postgres
 - [ ] Vercel deployment + final smoke test

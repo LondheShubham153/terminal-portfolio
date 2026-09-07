@@ -32,7 +32,7 @@ export function AdminNav() {
             key={link.href}
             href={link.href}
             className={
-              pathname === link.href
+              pathname === link.href || (link.href !== "/admin" && pathname.startsWith(`${link.href}/`))
                 ? "text-term-green"
                 : "text-term-fg-dim hover:text-term-fg transition-colors"
             }

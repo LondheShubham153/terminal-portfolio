@@ -1,12 +1,20 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
+import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { deletePost } from "./actions";
 
-export default async function AdminBlogPage() {
+export default async function AdminBlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const posts = await db.blogPost.findMany({ orderBy: { createdAt: "desc" } });
 
   return (
     <div>
+      <ErrorBanner show={error === "1"} />
       <div className="flex items-center justify-between mb-6">
         <p className="font-mono text-term-green">$ ls ./blog</p>
         <Link
@@ -28,7 +36,12 @@ export default async function AdminBlogPage() {
             <div className="flex gap-3 font-mono text-xs">
               <Link href={`/admin/blog/${post.id}/edit`} className="text-term-amber hover:underline">edit</Link>
               <form action={deletePost.bind(null, post.id)}>
-                <button type="submit" className="text-[#e8534d] hover:underline">delete</button>
+                <ConfirmSubmitButton
+                  confirmMessage={`Delete "${post.title}"? This cannot be undone.`}
+                  className="text-[#e8534d] hover:underline"
+                >
+                  delete
+                </ConfirmSubmitButton>
               </form>
             </div>
           </div>

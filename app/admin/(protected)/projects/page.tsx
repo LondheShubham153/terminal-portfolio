@@ -1,12 +1,20 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
+import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { deleteProject } from "./actions";
 
-export default async function AdminProjectsPage() {
+export default async function AdminProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const projects = await db.project.findMany({ orderBy: { order: "asc" } });
 
   return (
     <div>
+      <ErrorBanner show={error === "1"} />
       <div className="flex items-center justify-between mb-6">
         <p className="font-mono text-term-green">$ ls ./projects</p>
         <Link
@@ -31,9 +39,12 @@ export default async function AdminProjectsPage() {
                 edit
               </Link>
               <form action={deleteProject.bind(null, project.id)}>
-                <button type="submit" className="text-[#e8534d] hover:underline">
+                <ConfirmSubmitButton
+                  confirmMessage={`Delete "${project.title}"? This cannot be undone.`}
+                  className="text-[#e8534d] hover:underline"
+                >
                   delete
-                </button>
+                </ConfirmSubmitButton>
               </form>
             </div>
           </div>

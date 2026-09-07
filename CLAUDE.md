@@ -15,8 +15,8 @@ Guide for working on this repo. Read `tasks.md` for current status before starti
 - `npx prisma migrate dev --name <change>` — create + apply a migration (never use `prisma db push` once real content exists)
 - `npx prisma studio` — browse/edit the DB visually
 - `npx prisma generate` — regenerate client after schema changes
-- `npm run test` — Vitest unit tests (lib/utils)
-- `npm run test:e2e` — Playwright smoke tests (once added)
+- `npm run test` — Vitest unit tests (`lib/**/*.test.ts`)
+- `npm run test:e2e` — Playwright e2e suite (`e2e/`). Runs against a disposable `prisma/e2e-test.db`, migrated + seeded fresh by `e2e/setup-test-db.mjs` before the dev server starts (chained in `playwright.config.ts`'s `webServer.command` — do NOT switch this back to Playwright's `globalSetup`, it races the server start and the app boots before migrations exist).
 
 ## Conventions
 - Server Components by default; mark `"use client"` only where interactivity is required.
@@ -41,6 +41,15 @@ Guide for working on this repo. Read `tasks.md` for current status before starti
 - Prefer `high`/`xhigh` effort for implementation work in this repo — this is a real multi-file coding task, not a lookup.
 - Instructions are interpreted literally/narrowly — state the intended scope explicitly rather than relying on the model to generalize a pattern.
 - No need for manual "summarize every N tool calls" scaffolding; progress updates are already calibrated.
+
+## Form validation UX
+Any `httpUrl`-typed field (`lib/validation.ts`) auto-prepends `https://` to a bare domain like
+`github.com/me/repo` instead of rejecting it — the earlier strict-reject behavior caused a real
+bug where submitting a URL without a protocol silently failed with no visible error. Every
+mutating admin Server Action wraps its work in `runAdminAction` (`lib/admin-actions.ts`), which
+catches validation/DB errors and redirects to `?error=1` instead of crashing (Server Actions
+called from a plain `<form action>` have no error boundary); the corresponding page must render
+`<ErrorBanner show={error === "1"} />` or a failure will look like nothing happened.
 
 ## Known constraints
 - SQLite file writes do NOT persist on Vercel's serverless runtime — production must run against Turso/Postgres, not the local `.db` file. Do not treat local `dev.db` behavior as proof it'll work in prod.

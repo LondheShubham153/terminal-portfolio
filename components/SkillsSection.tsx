@@ -22,7 +22,7 @@ export function SkillsSection({ skills }: { skills: Skill[] }) {
               {items.map((skill) => (
                 <li key={skill.id} className="font-mono text-sm text-term-fg flex items-center gap-2">
                   <span className="text-term-green">{"".padStart(skill.level, "#").padEnd(5, "-")}</span>
-                  {skill.name}
+                  <span>{skill.name}</span>
                 </li>
               ))}
             </ul>

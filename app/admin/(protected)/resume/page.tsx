@@ -1,12 +1,19 @@
 import { db } from "@/lib/db";
+import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { uploadResume } from "./actions";
 
-export default async function AdminResumePage() {
+export default async function AdminResumePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const active = await db.resume.findFirst({ where: { isActive: true }, orderBy: { uploadedAt: "desc" } });
 
   return (
     <div>
       <p className="font-mono text-term-green mb-6">$ resume</p>
+      <ErrorBanner show={error === "1"} />
       {active ? (
         <p className="font-mono text-sm text-term-fg mb-6">
           current: <a href={active.fileUrl} className="text-term-amber hover:underline">{active.fileName}</a>

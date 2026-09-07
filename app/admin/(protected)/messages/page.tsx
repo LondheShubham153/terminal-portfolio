@@ -1,12 +1,20 @@
 import { db } from "@/lib/db";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
+import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { markMessageRead, deleteMessage } from "./actions";
 
-export default async function AdminMessagesPage() {
+export default async function AdminMessagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const messages = await db.contactMessage.findMany({ orderBy: { createdAt: "desc" } });
 
   return (
     <div>
       <p className="font-mono text-term-green mb-6">$ ls ./messages</p>
+      <ErrorBanner show={error === "1"} />
       <div className="grid gap-3">
         {messages.length === 0 && (
           <p className="font-mono text-sm text-term-fg-dim">// no messages yet</p>
@@ -28,7 +36,9 @@ export default async function AdminMessagesPage() {
                 </form>
               )}
               <form action={deleteMessage.bind(null, message.id)}>
-                <button type="submit" className="text-[#e8534d] hover:underline">delete</button>
+                <ConfirmSubmitButton confirmMessage={`Delete message from "${message.name}"?`} className="text-[#e8534d] hover:underline">
+                  delete
+                </ConfirmSubmitButton>
               </form>
             </div>
           </div>

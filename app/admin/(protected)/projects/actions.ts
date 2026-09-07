@@ -4,15 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/admin-actions";
-
-const httpUrl = z
-  .string()
-  .trim()
-  .max(500)
-  .refine((value) => value === "" || /^https?:\/\//i.test(value), "must be an http(s) URL")
-  .optional()
-  .or(z.literal(""));
+import { requireAdmin, runAdminAction } from "@/lib/admin-actions";
+import { httpUrl } from "@/lib/validation";
 
 const projectSchema = z.object({
   slug: z.string().trim().min(1).max(100).regex(/^[a-z0-9-]+$/, "lowercase letters, numbers, hyphens only"),
@@ -44,25 +37,31 @@ function parseFormData(formData: FormData) {
 
 export async function createProject(formData: FormData) {
   await requireAdmin();
-  const data = parseFormData(formData);
-  await db.project.create({ data });
-  revalidatePath("/");
-  revalidatePath("/admin/projects");
+  await runAdminAction(async () => {
+    const data = parseFormData(formData);
+    await db.project.create({ data });
+    revalidatePath("/");
+    revalidatePath("/admin/projects");
+  }, "/admin/projects/new?error=1");
   redirect("/admin/projects");
 }
 
 export async function updateProject(id: string, formData: FormData) {
   await requireAdmin();
-  const data = parseFormData(formData);
-  await db.project.update({ where: { id }, data });
-  revalidatePath("/");
-  revalidatePath("/admin/projects");
+  await runAdminAction(async () => {
+    const data = parseFormData(formData);
+    await db.project.update({ where: { id }, data });
+    revalidatePath("/");
+    revalidatePath("/admin/projects");
+  }, `/admin/projects/${id}/edit?error=1`);
   redirect("/admin/projects");
 }
 
 export async function deleteProject(id: string) {
   await requireAdmin();
-  await db.project.delete({ where: { id } });
-  revalidatePath("/");
-  revalidatePath("/admin/projects");
+  await runAdminAction(async () => {
+    await db.project.delete({ where: { id } });
+    revalidatePath("/");
+    revalidatePath("/admin/projects");
+  }, "/admin/projects?error=1");
 }

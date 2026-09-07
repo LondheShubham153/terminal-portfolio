@@ -1,12 +1,20 @@
 import { db } from "@/lib/db";
+import { ErrorBanner } from "@/components/admin/ErrorBanner";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 import { createExperience, deleteExperience } from "./actions";
 
-export default async function AdminExperiencePage() {
+export default async function AdminExperiencePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const experience = await db.experience.findMany({ orderBy: { order: "asc" } });
 
   return (
     <div>
       <p className="font-mono text-term-green mb-6">$ ls ./experience</p>
+      <ErrorBanner show={error === "1"} />
       <form action={createExperience} className="grid gap-3 sm:grid-cols-2 mb-8 font-mono text-sm max-w-2xl">
         <input name="role" placeholder="role" required className="rounded-md border border-term-border bg-term-bg-raised px-3 py-2 outline-none focus:border-term-green" />
         <input name="company" placeholder="company" required className="rounded-md border border-term-border bg-term-bg-raised px-3 py-2 outline-none focus:border-term-green" />
@@ -32,7 +40,9 @@ export default async function AdminExperiencePage() {
               {role.role} <span className="text-term-fg-dim">@ {role.company}</span>
             </span>
             <form action={deleteExperience.bind(null, role.id)}>
-              <button type="submit" className="text-[#e8534d] text-xs hover:underline">delete</button>
+              <ConfirmSubmitButton confirmMessage={`Delete "${role.role} @ ${role.company}"?`} className="text-[#e8534d] text-xs hover:underline">
+                delete
+              </ConfirmSubmitButton>
             </form>
           </div>
         ))}
