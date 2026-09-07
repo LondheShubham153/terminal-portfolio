@@ -63,7 +63,7 @@ Status legend: `[x]` Done · `[~]` In Progress · `[ ]` TODO. Every Done task mu
 - **Live production URL**: https://complete-portfolio-henna.vercel.app
 
 ## In Progress
-- [~] Connect the GitHub repo to Vercel for auto-deploy-on-push (the CLI's git-link step failed — needs the Vercel GitHub App authorized for this repo, likely a dashboard step).
+- [~] Connect the GitHub repo to Vercel for auto-deploy-on-push. **Re-verified**: `vercel git connect` still fails with the same "Failed to connect" error — confirmed still blocked on authorizing the Vercel GitHub App for this repo/account (dashboard step, needs the user). Until connected, deploys require manually running `vercel --prod`.
 
 ## TODO
-- [ ] Accessibility + performance + Core Web Vitals pass
+- [ ] Accessibility + performance + Core Web Vitals pass — **verified not started**: no Lighthouse/a11y audit artifacts or related commits exist in the repo yet.
