@@ -21,15 +21,16 @@ Status legend: `[x]` Done · `[~]` In Progress · `[ ]` TODO. Every Done task mu
 - `/code-review` (medium) on this chunk found 5 issues — fixed: rate-limit bucket cross-contamination (login/contact evicting each other early), restored `resetLoginRateLimit` (was dropped, would've caused false lockouts after successful logins), honeypot dead-code (zod was rejecting filled honeypot before the silent-success branch could run — now schema allows it through so the deception actually works), renamed Next.js font CSS vars to avoid self-referential `@theme inline` names. Left as noted-only: unused `getProjectBySlug`/`getPostBySlug` helpers (will be used by admin detail views next).
 - Verified: `npm run build` clean, dev server smoke-tested (`/` 200 with seeded skills rendering, `/blog` 200, `/resume` 404 as expected with no upload yet).
 
+## Done (cont. 3)
+- [x] Admin auth: login page, `/api/admin/login` + `/api/admin/logout`, `(protected)` route group gated by session in `layout.tsx`, `lib/admin-actions.ts#requireAdmin` used in every mutating server action.
+- [x] Admin CRUD: Projects (full create/edit/delete), Blog (full create/edit/delete + publish toggle, Markdown body), Skills/Experience/Testimonials (add/delete), Resume upload (local disk dev, documented Vercel Blob swap needed for prod), Messages inbox (mark read/delete).
+- `/code-review` (medium, auth-focused) found 7 issues on the auth+Projects chunk — fixed: `requireAdmin` now redirects to `/admin/login` instead of throwing an uncaught error from a `<form action>` Server Action; login route now runs a constant-time dummy bcrypt compare so response timing doesn't leak whether an email is registered; project link fields (`imageUrl`/`liveUrl`/`repoUrl`) now restricted to `http(s)://` to prevent stored `javascript:` URI XSS. Left as noted-only: IP-spoofable rate limiting (acceptable for a personal-site threat model), `parse` vs `safeParse` in project form (no error UI yet — acceptable, admin-only surface).
+- Verified end-to-end: login → session cookie → all admin pages 200, a project created directly in the DB appears on the public homepage immediately with **no redeploy**, confirming the core "editable without redeploy" requirement. Full `npm run build` clean across all 20 routes.
+
 ## In Progress
-- [~] Admin: login page + session cookie flow
+- [~] Second `/code-review` pass on remaining CRUD sections (skills/experience/testimonials/blog/resume/messages) — running.
 
 ## TODO
-- [ ] Admin: login page + session middleware
-- [ ] Admin: Projects CRUD
-- [ ] Admin: Blog CRUD
-- [ ] Admin: Skills/Experience/Testimonials CRUD
-- [ ] Admin: Resume upload (local disk dev / Vercel Blob prod)
 - [ ] SEO: per-page metadata, sitemap.xml, robots.txt, OG images
 - [ ] Accessibility + performance + Core Web Vitals pass
 - [ ] Vitest unit tests for lib/
