@@ -33,7 +33,7 @@ Guide for working on this repo. Read `tasks.md` for current status before starti
 ## Task & review workflow
 1. Check `tasks.md`, move the task to "In Progress".
 2. Implement.
-3. Run `/code-review` on the diff. Instruct it for **coverage, not filtering**: report every issue found, including low-severity or uncertain ones, each with a confidence + severity estimate — do not self-filter for importance at this stage.
+3. **Verify in parallel, not sequentially.** Dispatch `lint-build-checker`, `unit-test-runner`, `e2e-test-runner` (Agent tool) and `/code-review` (Skill tool) together in a single message with multiple tool calls, instead of running `npm run build`/`lint`/`test`/`test:e2e` one after another in the main thread. `/code-review` already backgrounds itself (every invocation runs as a fork while other work continues); these three agents give the mechanical checks the same property, so all four run concurrently and you wait only for the slowest one. Instruct `/code-review` for **coverage, not filtering**: report every issue found, including low-severity or uncertain ones, each with a confidence + severity estimate — do not self-filter for importance at this stage.
 4. Fix confirmed issues, then move the task to "Done" in `tasks.md` with a one-line note on what the review found/fixed.
 5. Never mark a task Done without a `/code-review` pass noted.
 

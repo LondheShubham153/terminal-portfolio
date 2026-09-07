@@ -65,5 +65,8 @@ Status legend: `[x]` Done · `[~]` In Progress · `[ ]` TODO. Every Done task mu
 ## In Progress
 - [~] Connect the GitHub repo to Vercel for auto-deploy-on-push. **Re-verified**: `vercel git connect` still fails with the same "Failed to connect" error — confirmed still blocked on authorizing the Vercel GitHub App for this repo/account (dashboard step, needs the user). Until connected, deploys require manually running `vercel --prod`.
 
+## Done (cont. 8)
+- [x] Added three project-scoped subagents (`.claude/agents/`) so verification runs in parallel instead of sequentially: `lint-build-checker` (lint+build, read-only), `unit-test-runner` (Vitest), `e2e-test-runner` (Playwright, can also author new specs). `CLAUDE.md`'s task workflow updated to dispatch all three + `/code-review` together in one message going forward. **Requires a Claude Code session restart to take effect** — new `agents/` directories are only scanned at session startup, confirmed via the `claude-code-guide` agent after the new subagents didn't show up mid-session on first try.
+
 ## TODO
 - [ ] Accessibility + performance + Core Web Vitals pass — **verified not started**: no Lighthouse/a11y audit artifacts or related commits exist in the repo yet.
