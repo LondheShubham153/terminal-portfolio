@@ -7,7 +7,7 @@ Guide for working on this repo. Read `tasks.md` for current status before starti
 - Prisma 6 + SQLite (`prisma/dev.db`) for local dev
 - Auth: bcrypt password hash + signed httpOnly session cookie (`jose`), no third-party auth provider
 - Blog content: Markdown stored in DB, rendered with `react-markdown`
-- Deployment: Vercel. Production DB will move to Turso (libSQL) — same Prisma schema, only `DATABASE_URL` changes. Production file uploads (resume, project images) go through Vercel Blob, never the local filesystem.
+- Deployment: Vercel. Production DB is Turso (libSQL) — the Prisma Client always runs through `@prisma/adapter-libsql` (`lib/db.ts`), so the only thing that changes between local and prod is `DATABASE_URL`/`TURSO_AUTH_TOKEN`. Resume upload (`app/admin/(protected)/resume/actions.ts`) uses Vercel Blob when `BLOB_READ_WRITE_TOKEN` is set (production), falling back to `public/uploads` locally — Vercel's runtime filesystem is otherwise read-only.
 
 ## Commands
 - `npm run dev` — start dev server
@@ -52,5 +52,21 @@ called from a plain `<form action>` have no error boundary); the corresponding p
 `<ErrorBanner show={error === "1"} />` or a failure will look like nothing happened.
 
 ## Known constraints
-- SQLite file writes do NOT persist on Vercel's serverless runtime — production must run against Turso/Postgres, not the local `.db` file. Do not treat local `dev.db` behavior as proof it'll work in prod.
+- SQLite file writes do NOT persist on Vercel's serverless runtime — production must run against Turso, not the local `.db` file. Do not treat local `dev.db` behavior as proof it'll work in prod.
 - Contact form must include a honeypot field and basic rate limiting — no captcha service for v1.
+- A local relative `file:./dev.db` `DATABASE_URL` is resolved by `lib/db-url.ts` against `<cwd>/prisma/`, matching where Prisma CLI puts it — do not "simplify" this back to passing the raw env var straight to `@libsql/client`, which resolves relative paths against cwd directly and would silently point at a different, empty database (see `lib/db-url.test.ts` for the exact regression).
+
+## Deployment (Vercel + Turso)
+
+One-time setup:
+1. **Turso database**: `turso db create portfolio-prod` (or via the Turso dashboard), then `turso db show portfolio-prod --url` and `turso db tokens create portfolio-prod` for `DATABASE_URL` (a `libsql://...` URL) and `TURSO_AUTH_TOKEN`.
+2. **Apply the schema to Turso**: `DATABASE_URL="libsql://..." npx prisma migrate deploy` from a machine with that env var set — this creates the tables on the fresh Turso DB. Re-run this after every future migration.
+3. **Seed the admin account on Turso** (once): `DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." ADMIN_EMAIL="..." ADMIN_PASSWORD="..." npm run db:seed`.
+4. **Vercel project**: `vercel link` (or import the repo in the Vercel dashboard), then set these Environment Variables in the Vercel project settings (Production, and Preview if desired):
+   - `DATABASE_URL` — the Turso `libsql://...` URL
+   - `TURSO_AUTH_TOKEN`
+   - `AUTH_SECRET` — a **different** random value than local dev (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
+   - `SITE_URL` — the production domain, e.g. `https://your-domain.vercel.app`
+   - `BLOB_READ_WRITE_TOKEN` — from Vercel Blob (Storage tab → create a Blob store, then copy its token). Required for resume upload to work in production; `app/admin/(protected)/resume/actions.ts` already switches to Vercel Blob automatically when this is set.
+5. **Deploy**: push to `main` (or `vercel --prod`). CI (`.github/workflows/ci.yml`) gates merges with lint/build/unit/e2e; Vercel's own build runs `next build` again at deploy time.
+6. **Smoke test production**: visit the deployed URL, confirm `/sitemap.xml` and `/robots.txt` resolve, log into `/admin/login` with the seeded credentials, and confirm a change made there appears on the live site immediately (no redeploy) — this is the core requirement of the whole project.
