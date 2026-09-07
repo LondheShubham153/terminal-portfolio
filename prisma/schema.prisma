@@ -2,9 +2,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// The actual connection (local file or Turso) is provided at runtime by the
+// driver adapter configured in prisma.config.ts / lib/db.ts — this url is a
+// required-but-unused placeholder (Prisma validates it must look like a
+// sqlite url even though driver-adapter mode ignores its value).
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 model AdminUser {

@@ -53,8 +53,17 @@ Status legend: `[x]` Done · `[~]` In Progress · `[ ]` TODO. Every Done task mu
 - Second `/code-review` pass found 3 more issues — fixed: `isRemote` classification now uses the *resolved* URL (post `resolveDatabaseUrl`) instead of the raw env value, so it can't diverge from what's actually passed to the adapter; auth token is now only forwarded when the connection is actually remote (was passed unconditionally, harmless but sloppy); resume upload now deletes the previous file/blob after a successful new upload (was accumulating unboundedly) and uses a collision-resistant filename instead of a bare timestamp; `.env.example`'s `TURSO_AUTH_TOKEN` uncommented for consistency with the other required vars.
 - Verified: `npm run build`/`lint` clean, `npm run test` 19/19, `npm run test:e2e` 14/14 (33 total), dev server confirmed serving real DB content through the new adapter.
 
+## Done (cont. 7) — Live deployment
+- [x] Pushed to GitHub: https://github.com/LondheShubham153/terminal-portfolio (public). CI green on push (lint+build, unit tests, e2e tests).
+- [x] Created Turso production database (`terminal-portfolio`), applied all migrations, seeded the production admin account and skills.
+- [x] **Fixed a real gap found while deploying**: `prisma migrate deploy` failed against the Turso URL because Prisma's schema-level `datasource.url` is syntax-validated against the declared provider *before* the driver adapter is consulted — even though the adapter is what actually connects. Fixed by switching `prisma.config.ts` to `engine: "js"` with an `adapter` factory (so CLI commands use the same `@prisma/adapter-libsql` path as the running app) and making `schema.prisma`'s `datasource.url` a static placeholder Prisma requires but never uses in this mode. Verified against both local `dev.db` and the real Turso database before relying on it.
+- [x] Created Vercel project, linked a public Vercel Blob store, set all 5 production env vars (`DATABASE_URL`, `TURSO_AUTH_TOKEN`, `AUTH_SECRET`, `SITE_URL`, `BLOB_READ_WRITE_TOKEN`), deployed to production.
+- [x] **Full production smoke test**: homepage/blog/sitemap/robots all 200, admin login works end-to-end with real session cookies, and — the core requirement of this whole project — inserting a project directly into the production Turso DB made it appear on the live homepage **instantly, with no redeploy**. Verified, then cleaned up the test row.
+- `/code-review` (medium) on the `prisma.config.ts`/schema change found 1 actionable issue — fixed: an empty (but defined) `DATABASE_URL` would have bypassed the local-file fallback due to `??` vs `||`; matched the same fix already applied in `lib/db.ts`.
+- **Live production URL**: https://complete-portfolio-henna.vercel.app
+
 ## In Progress
+- [~] Connect the GitHub repo to Vercel for auto-deploy-on-push (the CLI's git-link step failed — needs the Vercel GitHub App authorized for this repo, likely a dashboard step).
 
 ## TODO
 - [ ] Accessibility + performance + Core Web Vitals pass
-- [ ] **User action required** (needs your accounts/credentials, cannot be automated): create the Turso database, create the Vercel project, set environment variables, push to a GitHub remote, and deploy — exact steps in `CLAUDE.md` § Deployment.
