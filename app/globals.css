@@ -1,26 +1,71 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --term-bg: #0b0d0e;
+  --term-bg-raised: #121516;
+  --term-fg: #d7dce0;
+  --term-fg-dim: #7a838a;
+  --term-green: #7fffa1;
+  --term-amber: #e8a33d;
+  --term-border: #24292b;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-term-bg: var(--term-bg);
+  --color-term-bg-raised: var(--term-bg-raised);
+  --color-term-fg: var(--term-fg);
+  --color-term-fg-dim: var(--term-fg-dim);
+  --color-term-green: var(--term-green);
+  --color-term-amber: var(--term-amber);
+  --color-term-border: var(--term-border);
+  --font-mono: var(--font-jbmono);
+  --font-serif: var(--font-source-serif);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  scrollbar-color: var(--term-green) var(--term-bg);
+}
+
+::selection {
+  background: var(--term-green);
+  color: var(--term-bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--term-bg);
+  color: var(--term-fg);
+}
+
+/* Blinking terminal cursor used in the hero prompt */
+.cursor-blink::after {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 0.15em;
+  background: var(--term-green);
+  vertical-align: text-bottom;
+  animation: blink 1.1s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Subtle scanline/grain texture for the terminal aesthetic */
+.terminal-texture {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.015) 0px,
+    rgba(255, 255, 255, 0.015) 1px,
+    transparent 1px,
+    transparent 3px
+  );
 }

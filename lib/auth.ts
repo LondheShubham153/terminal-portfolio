@@ -2,6 +2,7 @@ import "server-only";
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { checkRateLimit, resetRateLimit } from "./rate-limit";
 
 const SESSION_COOKIE = "portfolio_admin_session";
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -66,37 +67,10 @@ export async function requireSession() {
   return session;
 }
 
-// In-memory login rate limiter. Single-instance-appropriate for a personal
-// portfolio's admin login; resets on server restart.
-const loginAttempts = new Map<string, { count: number; firstAttemptAt: number }>();
-const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-
-export function checkLoginRateLimit(identifier: string): { allowed: boolean; retryAfterMs?: number } {
-  const now = Date.now();
-
-  // Opportunistic eviction of stale entries so the map doesn't grow unbounded.
-  for (const [key, value] of loginAttempts) {
-    if (now - value.firstAttemptAt > WINDOW_MS) {
-      loginAttempts.delete(key);
-    }
-  }
-
-  const entry = loginAttempts.get(identifier);
-
-  if (!entry || now - entry.firstAttemptAt > WINDOW_MS) {
-    loginAttempts.set(identifier, { count: 1, firstAttemptAt: now });
-    return { allowed: true };
-  }
-
-  if (entry.count >= MAX_ATTEMPTS) {
-    return { allowed: false, retryAfterMs: WINDOW_MS - (now - entry.firstAttemptAt) };
-  }
-
-  entry.count += 1;
-  return { allowed: true };
+export function checkLoginRateLimit(identifier: string) {
+  return checkRateLimit("login", identifier, { maxAttempts: 5, windowMs: 15 * 60 * 1000 });
 }
 
 export function resetLoginRateLimit(identifier: string) {
-  loginAttempts.delete(identifier);
+  resetRateLimit("login", identifier);
 }

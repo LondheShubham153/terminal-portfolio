@@ -12,20 +12,19 @@ Status legend: `[x]` Done · `[~]` In Progress · `[ ]` TODO. Every Done task mu
 - [x] Auth lib (`lib/auth.ts`): bcrypt hashing + jose-signed session cookie + login rate limiting; seed script + .env/.env.example. `/code-review` (medium) found 6 issues — fixed: `.env.example` gitignore exclusion, seed.ts reusing `lib/db.ts` singleton, rate-limiter eviction, admin email case-normalization. Left as-is (low severity, noted): `getSession` blanket catch, `db:seed`/`prisma.seed` duplication.
 - [x] Design direction: proposed 4 concrete style options (Terminal Noir, Editorial Warm, Blueprint Structural, Deep Ink Motion) — user picked **Terminal Noir** (bg #0B0D0E, accent #7FFFA1/#E8A33D, JetBrains Mono headings + Charter body).
 
+## Done (cont. 2)
+- [x] Terminal Noir theme, layout, NavBar, Hero, Footer.
+- [x] Public sections: Projects, Skills, Experience, Testimonials — all reading live from SQLite via `lib/content.ts`, `page.tsx` set to `force-dynamic` so admin edits show without redeploy.
+- [x] Contact form (honeypot + rate limit) + `/api/contact` route, `lib/rate-limit.ts` shared limiter.
+- [x] Blog list (`/blog`) + post page (`/blog/[slug]`, Markdown via `react-markdown`).
+- [x] Resume download route (`/resume`, redirects to active Resume record; 404 if none uploaded).
+- `/code-review` (medium) on this chunk found 5 issues — fixed: rate-limit bucket cross-contamination (login/contact evicting each other early), restored `resetLoginRateLimit` (was dropped, would've caused false lockouts after successful logins), honeypot dead-code (zod was rejecting filled honeypot before the silent-success branch could run — now schema allows it through so the deception actually works), renamed Next.js font CSS vars to avoid self-referential `@theme inline` names. Left as noted-only: unused `getProjectBySlug`/`getPostBySlug` helpers (will be used by admin detail views next).
+- Verified: `npm run build` clean, dev server smoke-tested (`/` 200 with seeded skills rendering, `/blog` 200, `/resume` 404 as expected with no upload yet).
+
 ## In Progress
-- [~] Public layout + Terminal Noir theme setup (fonts, Tailwind theme tokens)
+- [~] Admin: login page + session cookie flow
 
 ## TODO
-- [ ] Seed script (`prisma/seed.ts`) with placeholder content
-- [ ] Public layout + navigation + theme
-- [ ] Hero + About section
-- [ ] Projects list + detail pages
-- [ ] Skills section
-- [ ] Experience timeline
-- [ ] Testimonials section
-- [ ] Blog list + post page (Markdown rendering)
-- [ ] Contact form (honeypot + rate limit, writes ContactMessage)
-- [ ] Resume download (serves active Resume record)
 - [ ] Admin: login page + session middleware
 - [ ] Admin: Projects CRUD
 - [ ] Admin: Blog CRUD
