@@ -15,7 +15,17 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return {};
-  return { title: `${post.title} — Shubham Londhe`, description: post.excerpt };
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      type: "article",
+      publishedTime: post.publishedAt?.toISOString(),
+    },
+    alternates: { canonical: `/blog/${post.slug}` },
+  };
 }
 
 export default async function BlogPostPage({

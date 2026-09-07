@@ -7,8 +7,12 @@ import { getPublishedPosts } from "@/lib/content";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Blog — Shubham Londhe",
+  title: "Blog",
   description: "Writing on software engineering, systems, and building things.",
+  openGraph: {
+    title: "Blog",
+    description: "Writing on software engineering, systems, and building things.",
+  },
 };
 
 export default async function BlogIndex() {
@@ -20,7 +24,7 @@ export default async function BlogIndex() {
       <main className="flex-1 mx-auto max-w-4xl px-6 py-20 w-full">
         <h1 className="font-mono text-2xl text-term-fg mb-8">$ ls ./blog</h1>
         {posts.length === 0 ? (
-          <p className="font-mono text-sm text-term-fg-dim">// no posts published yet</p>
+          <p className="font-mono text-sm text-term-fg-dim">{"// no posts published yet"}</p>
         ) : (
           <ul className="space-y-6">
             {posts.map((post) => (

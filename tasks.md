@@ -38,9 +38,16 @@ Status legend: `[x]` Done · `[~]` In Progress · `[ ]` TODO. Every Done task mu
 
 ## In Progress
 
+## Done (cont. 5)
+- [x] SEO: `lib/site.ts` canonical `SITE_URL` (validated with a safe fallback if malformed), root layout `metadataBase` + OpenGraph/Twitter defaults with title template, per-page metadata for blog index/post, `app/sitemap.ts` (home + blog index + every published post, freshness driven by latest project/post update), `app/robots.ts` (disallows `/admin`), dynamic OG images (`app/opengraph-image.tsx`, `app/blog/[slug]/opengraph-image.tsx` — 404s for an unknown slug instead of rendering a generic image).
+- [x] **Fixed a pre-existing lint failure that had gone unnoticed since the project's first commit**: `npm run lint` had 6 errors (5 "comment-as-text-node" false positives from the terminal-style `// no X yet` placeholder text, 1 `<a href="/">` that should be `next/link`). All fixed; lint is now clean and wired into CI so this can't regress silently again.
+- [x] GitHub Actions CI (`.github/workflows/ci.yml`): three parallel jobs — lint+build, Vitest, Playwright (uploads the HTML report as an artifact on failure) — runs on every push to `main` and every PR.
+- `/code-review` (medium) on the SEO changes found 5 issues — fixed: guarded `new URL(SITE_URL)` so a malformed env var falls back safely instead of crashing the whole app at module load, removed a hardcoded site-name duplicate in the blog OG image (now imports `SITE_NAME`), sitemap homepage freshness now considers posts too (was projects-only), blog OG image now 404s for an unknown slug instead of silently rendering a generic placeholder. Left as-is: informational note about `openGraph.images` relying on Next's automatic file-convention pickup (verified working).
+- Verified: `npm run lint` clean, `npm run build` clean (23 routes incl. sitemap/robots/OG images), `npm run test` 15/15, `npm run test:e2e` 14/14.
+
+## In Progress
+
 ## TODO
-- [ ] SEO: per-page metadata, sitemap.xml, robots.txt, OG images
 - [ ] Accessibility + performance + Core Web Vitals pass
-- [ ] GitHub Actions CI (lint + build + test + test:e2e)
 - [ ] Production DB decision + migration to Turso/Postgres
 - [ ] Vercel deployment + final smoke test

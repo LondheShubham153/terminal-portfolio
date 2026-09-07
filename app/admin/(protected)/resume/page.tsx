@@ -19,7 +19,7 @@ export default async function AdminResumePage({
           current: <a href={active.fileUrl} className="text-term-amber hover:underline">{active.fileName}</a>
         </p>
       ) : (
-        <p className="font-mono text-sm text-term-fg-dim mb-6">// no resume uploaded yet</p>
+        <p className="font-mono text-sm text-term-fg-dim mb-6">{"// no resume uploaded yet"}</p>
       )}
       <form action={uploadResume} className="flex items-center gap-4 font-mono text-sm">
         <input type="file" name="file" accept="application/pdf" required className="text-term-fg-dim" />

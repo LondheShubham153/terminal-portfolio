@@ -11,7 +11,7 @@ export function ExperienceSection({ experience }: { experience: Experience[] }) 
     <section id="experience" className="mx-auto max-w-4xl px-6 py-20">
       <SectionLabel index="§03" title="Experience" />
       {experience.length === 0 ? (
-        <p className="font-mono text-sm text-term-fg-dim">// no experience added yet</p>
+        <p className="font-mono text-sm text-term-fg-dim">{"// no experience added yet"}</p>
       ) : (
         <ol className="space-y-6 border-l border-term-border pl-6">
           {experience.map((role) => (

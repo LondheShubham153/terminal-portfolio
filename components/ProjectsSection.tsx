@@ -6,7 +6,7 @@ export function ProjectsSection({ projects }: { projects: Project[] }) {
     <section id="projects" className="mx-auto max-w-4xl px-6 py-20">
       <SectionLabel index="§01" title="Projects" />
       {projects.length === 0 ? (
-        <p className="font-mono text-sm text-term-fg-dim">// no projects added yet</p>
+        <p className="font-mono text-sm text-term-fg-dim">{"// no projects added yet"}</p>
       ) : (
         <div className="grid gap-4">
           {projects.map((project) => (

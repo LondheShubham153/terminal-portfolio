@@ -17,7 +17,7 @@ export default async function AdminMessagesPage({
       <ErrorBanner show={error === "1"} />
       <div className="grid gap-3">
         {messages.length === 0 && (
-          <p className="font-mono text-sm text-term-fg-dim">// no messages yet</p>
+          <p className="font-mono text-sm text-term-fg-dim">{"// no messages yet"}</p>
         )}
         {messages.map((message) => (
           <div key={message.id} className="rounded-md border border-term-border bg-term-bg-raised p-4">

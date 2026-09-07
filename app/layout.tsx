@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Source_Serif_4 } from "next/font/google";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 import "./globals.css";
 
 const mono = JetBrains_Mono({
@@ -15,8 +16,24 @@ const serif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "Shubham Londhe — Software Engineer",
-  description: "Portfolio of Shubham Londhe: projects, writing, and experience.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — Software Engineer`,
+    template: `%s — ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — Software Engineer`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — Software Engineer`,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
