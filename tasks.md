@@ -8,12 +8,14 @@ Status legend: `[x]` Done · `[~]` In Progress · `[ ]` TODO. Every Done task mu
 - [x] `CLAUDE.md` written with stack, conventions, task/review workflow, Sonnet 5 tuning notes, known constraints.
 - [x] `tasks.md` created.
 
+## Done (cont.)
+- [x] Auth lib (`lib/auth.ts`): bcrypt hashing + jose-signed session cookie + login rate limiting; seed script + .env/.env.example. `/code-review` (medium) found 6 issues — fixed: `.env.example` gitignore exclusion, seed.ts reusing `lib/db.ts` singleton, rate-limiter eviction, admin email case-normalization. Left as-is (low severity, noted): `getSession` blanket catch, `db:seed`/`prisma.seed` duplication.
+- [x] Design direction: proposed 4 concrete style options (Terminal Noir, Editorial Warm, Blueprint Structural, Deep Ink Motion) — user picked **Terminal Noir** (bg #0B0D0E, accent #7FFFA1/#E8A33D, JetBrains Mono headings + Charter body).
+
 ## In Progress
-- [~] Prisma client singleton (`lib/db.ts`) — done; auth lib (`lib/auth.ts`) next.
+- [~] Public layout + Terminal Noir theme setup (fonts, Tailwind theme tokens)
 
 ## TODO
-- [ ] Auth lib: bcrypt hashing + jose-signed session cookie + login rate limiting
-- [ ] Design direction: research + propose 3-4 concrete style options, get pick
 - [ ] Seed script (`prisma/seed.ts`) with placeholder content
 - [ ] Public layout + navigation + theme
 - [ ] Hero + About section
